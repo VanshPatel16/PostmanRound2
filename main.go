@@ -39,7 +39,6 @@ func main() {
 		port = "8000"
 	}
 
-	// app := controllers.NewApplication(database.UserData(database.Client, "Users"), database.PostData(database.Client, "Posts"))
 	router := gin.New()
 	router.Use(gin.Logger())
 
