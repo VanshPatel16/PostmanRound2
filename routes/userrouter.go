@@ -9,7 +9,6 @@ import (
 
 func UserRoutes(incomingRoutes *gin.Engine) {
 	incomingRoutes.Use(middleware.Authenticate2()) //only if user has a token can he access these routes
-	// incomingRoutes.Static("/static", "./static")
 	incomingRoutes.GET("/user", controllers.GetOwnUser())
 	incomingRoutes.DELETE("/user/delete", controllers.DeleteUser())
 	incomingRoutes.PUT("/user/update", controllers.UpdateUser())
