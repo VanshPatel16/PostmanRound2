@@ -13,3 +13,14 @@ I have used a jwt based authentication system,where i return a cookie containing
 
 DB : MongoDB
 Framework : Gin
+
+
+All the endpoints are properly documented in the postman collection.
+
+Some points to keep in mind
+
+Almost all the functions return a json response.
+The 'Update Post' function requires to send the edited part along with the unedited part as the json body.
+For 'Update User' function,only send what is reqiured to be updated.
+
+Also,the secured routes behind the middleware make sure that the user is logged in.So once you logout,the cookie is invalidated as the token will be revoked and hence you cannot access the secured routes anymore.
