@@ -1,0 +1,29 @@
+1) {
+    email : vansh@email.com
+    pass : vansh1625
+}
+
+
+2)
+{
+    "username" : "joeytribbiani",
+    "email" : "joey@email.com",
+    "password" : "joey12345",
+    "first_name" : "Joey",
+    "last_name" : "TribMan"
+}
+
+
+
+3)
+{
+    "username" : "monicageller",
+    "email" : "monica@email.com",
+    "password" : "mon12345",
+    "first_name" : "Monica",
+    "last_name" : "Geller"
+}
+
+
+client id : 211855943296-6eckmfraor842vvvl8ojpdo2rld8sapk.apps.googleusercontent.com
+client secret : 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
