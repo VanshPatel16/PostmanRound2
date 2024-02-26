@@ -21,6 +21,6 @@ Some points to keep in mind
 
 Almost all the functions return a json response.
 The 'Update Post' function requires to send the edited part along with the unedited part as the json body.
-For 'Update User' function,only send what is reqiured to be updated.
+For 'Update User' function,only send what is required to be updated.
 
 Also,the secured routes behind the middleware make sure that the user is logged in.So once you logout,the cookie is invalidated as the token will be revoked and hence you cannot access the secured routes anymore.
