@@ -49,11 +49,12 @@ type Post struct {
 	Post_id   string
 	Username  *string
 	Pictures  []string
-	Caption   *string
+	Caption   string
 	Comments  []Comment
 	LikedBy   []string
 	LikeCount uint64
 	Tags      []string
+	Path      []string
 }
 
 type Comment struct {
