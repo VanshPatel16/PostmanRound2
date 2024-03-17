@@ -8,7 +8,7 @@ import (
 )
 
 func UserRoutes(incomingRoutes *gin.Engine) {
-	incomingRoutes.Use(middleware.Authenticate2()) //only if user has a token can he access these routes
+	incomingRoutes.Use(middleware.Authenticate()) //only if user has a token can he access these routes
 	incomingRoutes.GET("/user", controllers.GetOwnUser())
 	incomingRoutes.DELETE("/user/delete", controllers.DeleteUser())
 	incomingRoutes.PUT("/user/update", controllers.UpdateUser())
@@ -24,4 +24,6 @@ func UserRoutes(incomingRoutes *gin.Engine) {
 	incomingRoutes.POST("/user/commentonpost/:post_id", controllers.CommentOnPost())
 	incomingRoutes.GET("/user/searchbytags", controllers.SearchPostsByTags())
 	incomingRoutes.POST("/user/bookmarkpost", controllers.BookmarkPost())
+	incomingRoutes.GET("/user/viewpostcontent", controllers.PostContent())
+	incomingRoutes.GET("/user/viewavatar", controllers.ViewAvatar())
 }
