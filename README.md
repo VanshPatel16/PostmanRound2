@@ -24,3 +24,11 @@ The 'Update Post' function requires to send the edited part along with the unedi
 For 'Update User' function,only send what is required to be updated.
 
 Also,the secured routes behind the middleware make sure that the user is logged in.So once you logout,the cookie is invalidated as the token will be revoked and hence you cannot access the secured routes anymore.
+
+
+UPDATE:
+
+Added file handling for posts.Now user can send images as files along with the post data using a form and that image will be saved in a directory and the path will be saved in the post struct itself.
+Multiple images can be sent be the user.
+If a post is deleted all the images in that post will also be deleted.
+Post details can be updated like before.
