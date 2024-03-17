@@ -9,6 +9,7 @@ import (
 	"myapp/helper"
 	"myapp/models"
 	"net/http"
+	"path/filepath"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -154,7 +155,7 @@ func Signup() gin.HandlerFunc {
 		user.Posts = posts
 		user.Followers = followers
 		user.Following = following
-		(user.Avatar) = "https://i.stack.imgur.com/l60Hf.png" //default user avatar
+		(user.Avatar) = "avatars\\defavatar.jpg" //default user avatar
 
 		resultInsertionNumber, err := userCollection.InsertOne(ctx, user)
 		defer cancel()
@@ -340,27 +341,71 @@ func UploadAvatar() gin.HandlerFunc {
 			})
 			return
 		}
-		var AvatarUrl bson.M
+		// var AvatarUrl bson.M
 
-		if err := c.BindJSON(&AvatarUrl); err != nil {
+		// if err := c.BindJSON(&AvatarUrl); err != nil {
+		// 	c.JSON(http.StatusBadRequest, gin.H{
+		// 		"error": "enter only the avatar url",
+		// 	})
+		// 	return
+		// }
+		// err := database.UpdateUser(*email, AvatarUrl)
+		// fmt.Printf("f")
+		// if err != nil {
+		// 	c.JSON(http.StatusInternalServerError, gin.H{
+		// 		"error": err,
+		// 	})
+		// 	return
+		// }
+
+		file, err := c.FormFile("avatar")
+		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
-				"error": "enter only the avatar url",
+				"msg": "could not get image",
 			})
 			return
-		}
-		// email := c.MustGet("email")
-		err := database.UpdateUser(*email, AvatarUrl)
+		} //obatain new pfp
 
+		filePath := filepath.Join("avatars", file.Filename)
+
+		err = c.SaveUploadedFile(file, filePath)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": err,
+				"msg": err,
 			})
 			return
+		} //save new pfp
+
+		//now add path to user's profile
+
+		var AvatarPath = bson.M{
+			"avatar": filePath,
 		}
+
+		database.UpdateUser(*email, AvatarPath)
 
 		c.JSON(http.StatusOK, gin.H{
 			"msg": "profile picture updated succesfully",
 		})
+
+	}
+}
+
+func ViewAvatar() gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		user, _ := c.Get("user")
+		email := user.(models.User).Email
+		loginStatus := CheckIfLoggedIn(*email)
+
+		if !loginStatus {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": "must be logged in to update profile",
+			})
+			return
+		} //if user is logged in then take his avatar path and send the file
+
+		c.File(user.(models.User).Avatar)
 
 	}
 }

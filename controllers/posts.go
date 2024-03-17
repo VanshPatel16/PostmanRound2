@@ -6,6 +6,8 @@ import (
 	"myapp/database"
 	"myapp/models"
 	"net/http"
+	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -26,16 +28,48 @@ func MakeAPost() gin.HandlerFunc {
 		} //checked if the user is logged in.
 		//if he is logged in,create a new post and take inputs from user
 
-		var newpost models.Post
-		if err := c.BindJSON(&newpost); err != nil {
+		if c.Request.ParseMultipartForm(10<<20) != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
-				"error": "incorrect format",
+				"error": "could not parse form",
+			})
+		}
+		form, _ := c.MultipartForm()
+
+		images := form.File["postimg"]
+		if images == nil {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": "no images found",
 			})
 			return
 		}
 
+		var newpost models.Post
+		// if err := c.ShouldBindJSON(&newpost); err != nil {
+		// 	c.JSON(http.StatusBadRequest, gin.H{
+		// 		"error": "incorrect format",
+		// 	})
+		// 	return
+		// }
+
+		newpost.Caption = c.PostForm("caption")
+		newpost.Tags = c.PostFormArray("tags")
+
 		//input captured
 
+		//save the image
+		for _, file := range images {
+
+			filePath := filepath.Join("images", file.Filename)
+			newpost.Path = append(newpost.Path, filePath)
+			err := c.SaveUploadedFile(file, filePath)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"msg": err,
+				})
+				return
+			}
+
+		}
 		//now fill other details of the post
 		var comments []models.Comment
 		var likedby []string
@@ -116,6 +150,16 @@ func DeleteAPost() gin.HandlerFunc {
 				"error": "invalid request body",
 			})
 			return
+		}
+
+		var postTodelete = database.GetPostById(postID.Post_id)
+
+		for _, val := range postTodelete.Path {
+			if os.Remove(val) != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"error": "could not delete img",
+				})
+			}
 		}
 
 		err := database.DeletePost(postID.Post_id, *email)
@@ -430,6 +474,43 @@ func BookmarkPost() gin.HandlerFunc {
 		c.JSON(http.StatusOK, gin.H{
 			"msg": "Post bookmarked sucesfully",
 		})
+
+	}
+}
+
+func PostContent() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		user, _ := c.Get("user")
+		email := user.(models.User).Email
+		loginStatus := CheckIfLoggedIn(*email)
+
+		if !loginStatus {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": "must be logged in to update profile",
+			})
+			return
+		}
+
+		var postID struct {
+			PostID string `json:"post_id"`
+		}
+
+		if c.BindJSON(&postID) != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": "could not bind json",
+			})
+			return
+		}
+
+		postCollection := database.OpenCollection(database.Client, "posts")
+		ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
+		var post models.Post
+		_ = postCollection.FindOne(ctx, bson.M{"post_id": postID.PostID}).Decode((&post))
+
+		for i := range post.Path {
+			c.File(post.Path[i])
+		}
 
 	}
 }
